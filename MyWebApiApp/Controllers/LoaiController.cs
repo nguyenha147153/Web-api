@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyWebApiApp.Data;
 using MyWebApiApp.Models;
@@ -31,12 +32,13 @@ namespace MyWebApiApp.Controllers
             {
                 return Ok(loai);
             }else
-            {
+            {               
                 return NotFound();
             }
         }
 
         [HttpPost]
+        [Authorize]
         public IActionResult CreateNew(LoaiModel loaiModel)
         {
             try

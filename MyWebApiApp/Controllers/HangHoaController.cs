@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MyWebApiApp.Data;
 using MyWebApiApp.Models;
 using System;
 using System.Collections.Generic;
@@ -11,12 +12,17 @@ namespace MyWebApiApp.Controllers
     [ApiController]
     public class HangHoaController : ControllerBase
     {
-        public static List<HangHoa> hangHoas = new List<HangHoa>();
+        private readonly MyDbContext _context;
+
+        public HangHoaController(MyDbContext context) 
+        {
+            _context = context;
+        }
 
         [HttpGet]
         public IActionResult GetAll()
         {
-            return Ok(hangHoas);
+            return Ok(_context.HangHoas);
         }
 
         [HttpGet("{id}")]
@@ -24,7 +30,7 @@ namespace MyWebApiApp.Controllers
         {
             try
             {
-                var hanghoa = hangHoas.SingleOrDefault(x => x.MaHangHoa == Guid.Parse(id));
+                var hanghoa = _context.HangHoas.SingleOrDefault(x => x.MaHH == Guid.Parse(id));
                 if (hanghoa == null)
                 {
                     return NotFound();
@@ -40,13 +46,14 @@ namespace MyWebApiApp.Controllers
         [HttpPost]
         public IActionResult Create(HangHoaVM hangHoaVM)
         {
-            var hanghoa = new HangHoa
+            var hanghoa = new MyWebApiApp.Data.HangHoa
             {
-                MaHangHoa = Guid.NewGuid(),
-                TenHangHoa = hangHoaVM.TenHangHoa,
+                MaHH = Guid.NewGuid(),
+                TenHH = hangHoaVM.TenHangHoa,
                 DonGia = hangHoaVM.DonGia,
             };
-            hangHoas.Add(hanghoa);
+            _context.HangHoas.Add(hanghoa);
+            _context.SaveChanges();
             return Ok(new
             {
                 Success = true,
@@ -55,23 +62,24 @@ namespace MyWebApiApp.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Edit(string id, HangHoa hangHoaEdit)
+        public IActionResult Edit(string id, MyWebApiApp.Data.HangHoa hangHoaEdit)
         {
             try
             {
-                var hanghoa = hangHoas.SingleOrDefault(x => x.MaHangHoa == Guid.Parse(id));
+                var hanghoa = _context.HangHoas.SingleOrDefault(x => x.MaHH == Guid.Parse(id));
                 if (hanghoa == null)
                 {
                     return NotFound();
                 }
 
-                if (id != hangHoaEdit.MaHangHoa.ToString())
+                if (id != hangHoaEdit.MaHH.ToString())
                 {
                     return BadRequest();
                 }
                 //Update
-                hanghoa.TenHangHoa = hangHoaEdit.TenHangHoa;
+                hanghoa.TenHH = hangHoaEdit.TenHH;
                 hanghoa.DonGia = hangHoaEdit.DonGia;
+                _context.SaveChanges();
 
                 return Ok();
             }
@@ -86,13 +94,13 @@ namespace MyWebApiApp.Controllers
         {
             try
             {
-                var hanghoa = hangHoas.SingleOrDefault(x => x.MaHangHoa == Guid.Parse(id));
+                var hanghoa = _context.HangHoas.SingleOrDefault(x => x.MaHH == Guid.Parse(id));
                 if (hanghoa == null)
                 {
                     return NotFound();
                 }
                 //Update
-                hangHoas.Remove(hanghoa);
+                _context.HangHoas.Remove(hanghoa);
 
                 return Ok();
             }
